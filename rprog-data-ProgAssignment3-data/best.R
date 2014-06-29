@@ -30,6 +30,7 @@ best<-function(state,outcome){
   return(best_outcomes$Hospital.Name)
 }
 
+# Map outcome to column name
 col_outcome<-function(o){
   ha<-c("heart attack")
   if(o=='heart attack') { return('Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack')}
@@ -38,7 +39,7 @@ col_outcome<-function(o){
   stop("Wrong outcome string")
 }
 
-
+# Adds a numeriv column that can be used to find min and then select appropriate rows
 get_outcome_wnum<-function(df,outcome){
   if(outcome=='heart attack') { 
     values<-df["Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack"]
@@ -71,14 +72,14 @@ get_best<-function(df,mvalue){
   stop("Wrong outcome string")
 }
 
+### Just a simple debug function
 debug<-function(lable,value){
   cat(lable,value)
 }
 
 
 
-###########
-
+########### OLD can be removed
 get_min<-function(df,outcome){
   if(outcome=='heart attack') { 
     return(min(df$Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack ))
@@ -92,6 +93,7 @@ get_min<-function(df,outcome){
   stop("Wrong outcome string")
 }
 
+######## just a help function, used it to find  suitable test data with multiple results
 get_all<-function(outcome){
   full_df <- read.csv("outcome-of-care-measures.csv", colClasses = "character",na.strings=c("Not Available"))
   clean_df<-na.omit(full_df)
