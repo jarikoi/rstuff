@@ -3,7 +3,8 @@ setwd("/Users/jkoister/miscdev/rclass/rprog-data-ProgAssignment3-data")
 
 
 #cStatus ... jamfor numerid med string nar jag skall plocka ur hospital
-
+val_outcomes<-c("heart attack","heart failure","pneumonia")
+val_states<-c("AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","MD","MA","MI","MN","MS","MO","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY")
 best<-function(state,outcome){
   ##read outcome data
   full_df <- read.csv("outcome-of-care-measures.csv", colClasses = "character",na.strings=c("Not Available"))
@@ -21,53 +22,12 @@ best<-function(state,outcome){
   # Get outcome data
   outcome_df<-clean_df[,c('Hospital.Name','State',col_n)]
   state_outcome_df<-outcome_df[outcome_df$State==state,]
-  state_outcome_dfn<-NULL # Will hold a num column
-  #as.double(state_outcome_df[,3])
-  # mvalue<-min(state_outcome_df$col_n)
-  #mvalue<-get_min(state_outcome_df,outcome)
- 
- if(outcome=='heart attack') { 
-   debug("ha",mvalue)
-  values<-state_outcome_df["Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack"]
-  valuesn<-data.matrix(values)
-  mvalue<-min(valuesn)
-  colnames(valuesn)<-c("num")
-  state_outcome_dfn<-cbind(state_outcome_df,valuesn)
- }
- if(outcome=='heart failure') { 
-   values<-state_outcome_df["Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure"]
-   valuesn<-data.matrix(values)
-   mvalue<-min(valuesn)
-   colnames(valuesn)<-c("num")
-   state_outcome_dfn<-cbind(state_outcome_df,valuesn)
-   debug("hf",mvalue)
- }
- if(outcome=='pneumonia'){
-   values<-state_outcome_df["Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia"]
-   valuesn<-data.matrix(values)
-   mvalue<-min(valuesn)
-   colnames(valuesn)<-c("num")
-   state_outcome_dfn<-cbind(state_outcome_df,valuesn)
-   debug("p",mvalue)
- }
- #best_outcomes<-state_outcome_df[state_outcome_df$Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack==mvalue,]
- #best_outcomes<-state_outcome_df[state_outcome_df$Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack==mvalue,]
- ## Return hospital name in hat that state with lowest 30-day death rate
- 
-  best_outcomes<-get_best(state_outcome_dfn,outcome,mvalue)
+  # Add numeric column with values, called num
+  state_outcome_dfn<-get_outcome_wnum(state_outcome_df,outcome)
+  mvalue<-min(state_outcome_dfn$num)
+  best_outcomes<-get_best(state_outcome_dfn,mvalue)
   #best_outcomes<-get_best2(state_outcome_df,col_n,mvalue)
-  return(best_outcomes)
-}
-
-# returns true or false
-val_states<-c("AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","MD","MA","MI","MN","MS","MO","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY")
-valid_state<-function(state){
-  return(state %in% val_states)
-}
-
-val_outcomes<-c("heart attack","heart failure","pneumonia")
-valid_outcome<-function(o){
-  return(o %in% val_outcomes)
+  return(best_outcomes$Hospital.Name)
 }
 
 col_outcome<-function(o){
@@ -78,21 +38,37 @@ col_outcome<-function(o){
   stop("Wrong outcome string")
 }
 
-get_best<-function(df,outcome,mvalue){
+
+get_outcome_wnum<-function(df,outcome){
   if(outcome=='heart attack') { 
-    return(df[df$num==mvalue,])
+    values<-df["Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack"]
+    valuesn<-data.matrix(values)
+    colnames(valuesn)<-c("num")
+    return(cbind(df,valuesn))
   }
   if(outcome=='heart failure') { 
-    return(df[df$num==mvalue,])
+    values<-df["Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure"]
+    valuesn<-data.matrix(values)
+    mvalue<-min(valuesn)
+    colnames(valuesn)<-c("num")
+    return(cbind(df,valuesn))
   }
   if(outcome=='pneumonia'){
-    return(df[df$num==mvalue,])
+    values<-df["Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia"]
+    valuesn<-data.matrix(values)
+    mvalue<-min(valuesn)
+    colnames(valuesn)<-c("num")
+    return(cbind(df,valuesn))
   }
-  stop("Wrong outcome string")
+  stop("problem in get_outcome_wnum")
 }
 
-get_best2<-function(df,outcome,mvalue){
-    return(df[df$outcome==mvalue,])
+get_best<-function(df,mvalue){
+
+  min.df <- df[df$num==mvalue,]
+  sort.df <- with(min.df,  min.df[order(min.df$Hospital.Name), ])
+  return(sort.df)
+  stop("Wrong outcome string")
 }
 
 debug<-function(lable,value){
@@ -114,4 +90,19 @@ get_min<-function(df,outcome){
     return(min(df$Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia))
   }
   stop("Wrong outcome string")
+}
+
+get_all<-function(outcome){
+  full_df <- read.csv("outcome-of-care-measures.csv", colClasses = "character",na.strings=c("Not Available"))
+  clean_df<-na.omit(full_df)
+  # Get outcome data
+  col_n<-col_outcome(outcome)
+  outcome_df<-clean_df[,c('Hospital.Name','State',col_n)]
+  for (i in val_states) {
+    cat("************STATE STATE STATE", i)
+    state_outcome_df<-outcome_df[outcome_df$State==i,]
+    state_outcome_dfn<-get_outcome_wnum(state_outcome_df,outcome)
+    b<-get_best(state_outcome_dfn,min(state_outcome_dfn$num))
+    print(b)
+  }
 }
