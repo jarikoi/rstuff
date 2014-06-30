@@ -10,8 +10,14 @@ val_outcomes<-c("heart attack","heart failure","pneumonia")
 val_states<-c("AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","MD","MA","MI","MN","MS","MO","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY")
 
 rankall <- function(outcome, num = "best") {
-  ## Read outcome data
+  allrank<-NULL
+  for (is in val_states){
+    #rbind(allrank,rankhospital(is,outcome,num))
+    print(rankhospital(is,outcome,num))
+  }
+  return(allrank)
 }
+
 
 rankhospital <- function(state, outcome, numi = "best") {
   ## Read outcome data
@@ -43,13 +49,13 @@ rankhospital <- function(state, outcome, numi = "best") {
     return(state_outcome_dfo)
   }
   if(numi == "best") {
-    return(state_outcome_dfo[1,]$Hospital.Name)
+    return(c(state_outcome_dfo[1,]$Hospital.Name,state))
   }
   if(numi == "worst") {
-    return(state_outcome_dfo[nrow(state_outcome_dfo),]$Hospital.Name)
+    return(c(state_outcome_dfo[nrow(state_outcome_dfo),]$Hospital.Name,state))
   }
   theone<-state_outcome_dfo[numi,]
-  return(theone$Hospital.Name)
+  return(c(theone$Hospital.Name,theone$State))
 }
 
 
@@ -102,6 +108,14 @@ get_best<-function(df,mvalue){
   sort.df <- with(min.df,  min.df[order(min.df$Hospital.Name), ])
   return(sort.df)
   stop("Wrong outcome string")
+}
+
+valid_state<-function(state){
+  return(state %in% val_states)
+}
+
+valid_outcome<-function(o){
+  return(o %in% val_outcomes)
 }
 
 ### Just a simple debug function

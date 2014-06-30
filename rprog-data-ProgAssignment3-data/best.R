@@ -72,6 +72,15 @@ get_best<-function(df,mvalue){
   stop("Wrong outcome string")
 }
 
+
+valid_state<-function(state){
+  return(state %in% val_states)
+}
+
+valid_outcome<-function(o){
+  return(o %in% val_outcomes)
+}
+
 ### Just a simple debug function
 debug<-function(lable,value){
   cat(lable,value)
