@@ -13,7 +13,6 @@ val_states<-c("AK","AL","AZ","AR","CA","CO","CT","DC","DE","FL","GA","HI","IA","
 rankall <- function(outcome, num = "best") {
   allrank<-NULL
   for (is in val_states){
-
     tmp<-rankhospital(is,outcome,num)
     allrank<-rbind(allrank,tmp)
   }
@@ -38,11 +37,12 @@ rankhospital <- function(state, outcome, numi = "best") {
   # Get column name
   col_n<-col_outcome(outcome)
   # Remove NA, could ne done after column selection for better performance
-  clean_df<-na.omit(full_df)
+
   
   # Get outcome data
-  outcome_df<-clean_df[,c('Hospital.Name','State',col_n)]
-  state_outcome_df<-outcome_df[outcome_df$State==state,]
+  outcome_df<-full_df[,c('Hospital.Name','State',col_n)]
+  clean_df<-na.omit(outcome_df)
+  state_outcome_df<-clean_df[clean_df$State==state,]
   # Add numeric column with values, called num
   state_outcome_dfn<-get_outcome_wnum(state_outcome_df,outcome)
   #return(state_outcome_dfn)
